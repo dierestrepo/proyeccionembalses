@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecci&oacute;n de volumen &ndash; Chuza y Sistema Agregado Norte</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#eceff1;color:#1a1a2e;min-height:100vh;padding:16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(0,0,0,.12);padding:22px 24px 18px;max-width:1280px;margin:0 auto}
+h1{font-size:1.15rem;font-weight:700;text-align:center;color:#1a237e;margin-bottom:3px}
+.subtitle{text-align:center;font-size:.76rem;color:#777;margin-bottom:4px}
+.credit{text-align:center;font-size:.68rem;color:#aaa;margin-bottom:12px}
+.emb-tabs{display:flex;gap:10px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.emb{padding:8px 22px;border-radius:22px;border:2px solid #ccc;background:#fafafa;font-size:.86rem;cursor:pointer;font-weight:700;transition:all .15s;color:#666;line-height:1.15}
+.emb small{display:block;font-size:.62rem;font-weight:600;opacity:.75;margin-top:1px}
+.emb:hover{background:#eee}
+.emb.active{color:#fff}
+.view-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.vtab{padding:6px 20px;border-radius:20px;border:1.5px solid #ccc;background:#f5f5f5;font-size:.8rem;cursor:pointer;font-weight:600;transition:all .15s}
+.vtab:hover{background:#e0e0e0}
+.vtab.active{background:#1a237e;color:#fff;border-color:#1a237e}
+.chart-wrap{position:relative;height:460px;margin-bottom:4px}
+.btn{padding:4px 11px;border-radius:5px;border:1px solid #ccc;background:#f5f5f5;font-size:.73rem;cursor:pointer;transition:background .15s}
+.btn:hover{background:#e0e0e0}
+.pbtn{padding:5px 14px;border-radius:18px;border:1.5px solid #ccc;background:#f5f5f5;font-size:.74rem;cursor:pointer;font-weight:600;transition:all .15s}
+.pbtn:hover{background:#e0e0e0}
+.pbtn.active{background:#37474f;color:#fff;border-color:#37474f}
+.ctrl-label{font-size:.73rem;font-weight:700;color:#555}
+.info-bar{font-size:.73rem;color:#777;margin-top:9px;line-height:1.5}
+.info-bar b{color:#444}
+.esc-row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px;padding:10px 14px;background:#f6f7f8;border-radius:10px}
+.rng{display:flex;align-items:center;gap:8px;font-size:.76rem;color:#52514e;font-weight:600}
+.rng input{width:130px;accent-color:#eb6834}
+.rng b{min-width:30px;text-align:right;font-variant-numeric:tabular-nums;color:#1a1a2e}
+.esc-nota{font-size:.72rem;color:#52514e}
+.zoom{margin-left:auto;display:flex;gap:6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.stat{border:1px solid #e1e0d9;border-radius:10px;padding:9px 12px}
+.stat .lbl{font-size:.7rem;color:#52514e;font-weight:600}
+.stat .num{font-size:1.3rem;font-weight:700;color:#1a1a2e;margin-top:2px}
+.stat .sub{font-size:.7rem;color:#898781;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip2{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:.73rem;font-weight:600;cursor:pointer;border:1.5px solid #d6d5ce;background:#fff;color:#1a1a2e;user-select:none;font-family:inherit}
+.chip2:hover{background:#f5f5f3}
+.chip2.off{opacity:.38}
+.key{display:inline-block;width:22px;height:0;border-top:2px solid;vertical-align:middle}
+.sw{display:inline-block;width:18px;height:12px;border-radius:3px;vertical-align:middle}
+.mk-dia{display:inline-block;width:10px;height:10px;transform:rotate(45deg);margin:0 3px}
+.mk-tri{display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid}
+.afl-legend{display:flex;gap:8px 18px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.afl-leg-item{display:flex;align-items:center;gap:6px;font-size:.76rem;font-weight:600;color:#1a1a2e}
+.afl-note{text-align:center;font-size:.72rem;color:#777;margin-top:6px;font-style:italic;line-height:1.5}
+.tabla-wrap{overflow-x:auto;margin-top:12px}
+.tabla{width:100%;border-collapse:collapse;font-size:.74rem;font-variant-numeric:tabular-nums}
+.tabla th{background:#f5f5f3;color:#52514e;font-weight:700;text-align:right;padding:5px 9px;border-bottom:1px solid #e1e0d9;white-space:nowrap}
+.tabla td{text-align:right;padding:5px 9px;border-bottom:1px solid #eeede8;color:#1a1a2e}
+.tabla th:first-child,.tabla td:first-child{text-align:left}
+.tabla.txt th,.tabla.txt td{text-align:left;white-space:normal}
+.sup h3{font-size:.86rem;color:#1a237e;margin:18px 0 6px}
+.sup h3:first-child{margin-top:4px}
+.sup p,.sup li{font-size:.77rem;color:#333;line-height:1.6;margin-top:6px}
+.sup ul{padding-left:18px}
+.fuente{font-size:.68rem;color:#898781;text-align:center;margin-top:14px;border-top:1px solid #eee;padding-top:8px;line-height:1.5}
+#tt{position:fixed;background:rgba(20,20,40,.94);color:#fff;padding:8px 12px;border-radius:8px;font-size:.76rem;pointer-events:none;z-index:9999;display:none;line-height:1.65;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#tt .tt-t{font-weight:700;margin-bottom:2px}
+#tt .tt-row{display:flex;align-items:center;gap:7px;white-space:nowrap}
+#tt .tt-key{display:inline-block;width:14px;height:0;border-top:2px solid}
+#tt .tt-sw{display:inline-block;width:14px;height:9px;border-radius:2px}
+#tt .tt-lbl{opacity:.72}
+canvas:focus{outline:2px solid #90caf9;outline-offset:2px;border-radius:4px}
+@media (max-width:640px){
+  .card{padding:16px 14px}
+  .chart-wrap{height:380px}
+  .zoom{margin-left:0}
+  .rng input{width:110px}
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 id="h1">Proyecci&oacute;n de Volumen &ndash; Embalse de Chuza</h1>
+  <div class="subtitle" id="sub"></div>
+  <div class="credit">Elaborado por: Diego Restrepo</div>
+
+  <div class="emb-tabs" id="embTabs"></div>
+
+  <div class="view-tabs">
+    <button class="vtab active" id="tabP" onclick="switchView('P')">Proyecci&oacute;n de volumen</button>
+    <button class="vtab" id="tabF" onclick="switchView('F')">Afluencias</button>
+    <button class="vtab" id="tabI" onclick="switchView('I')">Se&ntilde;al IDEAM</button>
+    <button class="vtab" id="tabS" onclick="switchView('S')">Supuestos y verificaci&oacute;n</button>
+  </div>
+
+  <div id="viewP">
+    <div class="esc-row">
+      <span class="ctrl-label">Operaci&oacute;n:</span>
+      <label class="rng" id="rngChuza">Descarga Chuza
+        <input type="range" id="qChuza" min="5" max="15" step="0.1"><b id="qChuzaV"></b>m&sup3;/s</label>
+      <label class="rng" id="rngTib">Tratamiento Tibitoc
+        <input type="range" id="qTib" min="5" max="10" step="0.1"><b id="qTibV"></b>m&sup3;/s</label>
+      <label class="rng" id="rngRio">Aporte del r&iacute;o nov&ndash;dic
+        <input type="range" id="qRio" min="0" max="4" step="0.1"><b id="qRioV"></b>m&sup3;/s</label>
+      <span class="esc-nota" id="escNota"></span>
+      <button class="btn" id="btnReset">Restablecer</button>
+      <span class="zoom">
+        <button class="pbtn active" id="zAnio">A&ntilde;o 2026</button>
+        <button class="pbtn" id="zPro">Ago&ndash;dic</button>
+      </span>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="chart-wrap"><canvas id="cp" tabindex="0" role="img"
+      aria-label="Volumen observado en 2026 y proyecci&oacute;n hasta diciembre. Use las flechas para recorrer los d&iacute;as."></canvas></div>
+    <div class="chips" id="chipsP"></div>
+    <div class="info-bar" id="infoP"></div>
+    <div id="tablaP"></div>
+  </div>
+
+  <div id="viewF" style="display:none">
+    <div class="afl-legend" id="legF"></div>
+    <div class="chart-wrap"><canvas id="cf"></canvas></div>
+    <div class="afl-note" id="notaF"></div>
+    <div id="tablaF"></div>
+  </div>
+
+  <div id="viewI" style="display:none">
+    <div class="afl-legend" id="legI"></div>
+    <div class="chart-wrap"><canvas id="ci"></canvas></div>
+    <div class="afl-note" id="notaI"></div>
+  </div>
+
+  <div id="viewS" style="display:none">
+    <div class="sup" id="sup"></div>
+  </div>
+
+  <div class="fuente" id="fuente"></div>
+</div>
+<div id="tt"></div>
+<script>
+// ===== Insumos: generados por pronostico.py =====
+// Reportes diarios de embalses CAR, comité hidrológico CAR y tabla de anomalías del IDEAM.
+// No se edita a mano: `python3 pronostico.py` reescribe la línea siguiente.
+const PRON = {"meta":{"generado":"2026-09-30","inicio":"2026-09-29","emision":"2026-06","fecha_comite":"13 ago 2026","tibitoc":7.5,"rio":0.0,"analogos":[2009,2025],"min_dias":20,"descartes":{"chuza":137,"tomine":3,"neusa":0,"sisga":0}},"emb":{"chuza":{"nom":"Chuza","sis":"Sistema Chingaza","hoja":"CHINGAZA 09","ymax":240,"ystep":40,"cap":218.1,"cap_fuente":"IDEAM, radicado 20263040120291: 137.2 Mm³ = 62.9 % el 9 jul 2026","vmax":224.0,"v0":202.52,"obs":"157.4,155.9,154.4,152.9,151.5,150.2,149.9,148.5,147.3,145.9,144.4,143.1,141.7,140.6,139.9,139.0,138.3,136.9,135.6,134.3,132.9,131.6,130.6,129.2,127.9,126.7,125.3,124.2,123.4,122.2,121.1,119.8,118.8,117.5,116.1,114.8,113.5,112.4,111.2,109.8,108.4,107.1,105.7,104.3,103.3,101.9,100.7,99.9,99.0,98.7,97.7,97.1,95.9,95.5,94.9,94.0,93.0,91.7,90.8,89.5,88.3,87.1,85.9,84.6,83.5,82.4,81.3,79.9,78.8,77.9,76.9,75.9,74.9,73.9,72.9,72.0,71.2,71.0,70.0,69.1,68.2,67.9,67.3,66.2,65.4,64.6,63.7,63.0,62.6,62.1,61.6,60.9,60.5,60.0,59.5,59.7,59.4,60.3,59.8,59.8,60.0,59.5,59.0,59.1,59.4,59.4,60.4,60.5,60.4,60.1,59.8,59.4,59.1,59.2,58.8,58.7,58.8,58.5,60.3,60.3,60.1,62.5,62.9,64.8,65.6,69.9,71.3,71.7,71.7,71.7,72.2,73.0,73.7,75.4,75.9,76.9,78.9,79.7,82.9,83.6,84.1,86.4,87.6,88.0,88.8,92.0,96.8,100.1,102.8,103.8,105.0,105.7,107.4,108.4,108.1,109.5,109.9,110.8,111.8,112.4,112.3,112.1,111.9,111.4,111.1,111.1,113.2,114.3,115.4,116.0,115.9,116.0,116.5,117.9,117.9,118.1,119.2,121.0,122.4,124.1,126.3,127.8,129.7,132.0,133.3,134.9,136.0,136.1,136.3,137.2,138.3,139.2,140.6,140.9,140.8,142.3,143.9,144.0,146.3,150.6,152.4,152.5,152.6,158.5,159.8,160.1,161.7,161.9,161.7,162.2,164.4,165.1,165.0,164.9,164.7,164.3,166.6,167.4,167.6,169.5,170.8,170.7,170.5,170.0,169.6,169.8,171.7,172.4,178.4,179.6,180.6,180.7,180.8,184.1,185.7,186.8,186.9,187.9,188.1,188.1,189.9,195.3,196.3,196.5,199.0,200.3,201.1,201.6,202.0,202.1,202.2,202.5,202.6,203.6,203.6,205.2,205.4,204.9,205.5,205.1,204.8,204.7,206.0,205.5,204.8,204.1,203.4,202.6,201.7,200.8,203.0,202.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,","ult":[2026,9,29,202.5],"analogos":{"2009":[12.08,14.35,9.84,1.82],"2011":[26.59,39.77,26.45,17.47],"2012":[24.37,21.87,10.51,18.01],"2013":[22.67,17.42,29.22,15.19],"2014":[17.42,24.26,17.87,13.54],"2015":[9.37,9.71,21.94,9.76],"2016":[38.37,18.54,31.15,12.58],"2017":[13.16,19.66,17.19,9.17],"2018":[16.0,7.66,8.69,1.89],"2020":[20.85,20.47,35.81,5.45],"2021":[28.69,25.0,12.73,3.37],"2022":[20.7,21.55,32.06,8.21],"2023":[17.07,9.46,23.25,18.65],"2024":[8.37,20.5,31.98,5.95],"2025":[35.87,35.32,12.05,11.03]},"afl":{"tit":"Afluencia","uni":"m³/s","media":[2.29,2.78,6.93,12.96,18.36,22.79,22.4,10.74,7.95,7.51,8.03,3.9],"p10":[0.96,1.14,2.85,8.08,9.07,13.9,14.08,5.27,4.14,3.58,3.93,1.04],"p90":[4.78,4.33,12.97,17.34,25.19,37.88,30.08,16.62,12.45,11.26,12.35,6.6],"n":[15,13,14,14,13,15,16,16,16,16,16,17],"act":[3.35,3.33,2.44,8.05,23.07,17.78,24.92,22.02,13.59,null,null,null],"dias":[31,28,30,30,31,30,31,31,29,null,null,null],"dim":[31,28,31,30,31,30,31,31,30,31,30,31]},"ideam":{"media":[24.57,23.75,23.41,24.75,28.63,37.35,45.35,35.58,27.86,26.99,26.19,25.68],"emis":{"2025-12":{"2025-12":2.3,"2026-01":0.4,"2026-02":-0.4,"2026-03":-0.9,"2026-04":-5.6,"2026-05":-17.1,"2026-06":-33.0},"2026-01":{"2026-01":-0.2,"2026-02":-0.2,"2026-03":-0.9,"2026-04":-5.9,"2026-05":-17.4,"2026-06":-32.6,"2026-07":-28.6},"2026-02":{"2026-02":1.3,"2026-03":0.6,"2026-04":-4.2,"2026-05":-15.5,"2026-06":-5.8,"2026-07":-32.0,"2026-08":-22.3},"2026-03":{"2026-03":0.3,"2026-04":-4.2,"2026-05":-15.9,"2026-06":-34.9,"2026-07":-33.8,"2026-08":-23.7,"2026-09":-5.8},"2026-04":{"2026-04":-6.1,"2026-05":-17.6,"2026-06":-34.2,"2026-07":-39.4,"2026-08":-23.8,"2026-09":-5.4,"2026-10":-7.9},"2026-05":{"2026-05":-17.1,"2026-06":-33.7,"2026-07":-23.0,"2026-08":-21.5,"2026-09":-4.1,"2026-10":-8.1,"2026-11":-9.6},"2026-06":{"2026-06":-31.6,"2026-07":-32.0,"2026-08":-21.2,"2026-09":-3.6,"2026-10":-8.9,"2026-11":-9.8,"2026-12":-8.8}},"obs":{"2025-12":5.5,"2026-01":46.5,"2026-02":20.0,"2026-03":-64.8,"2026-04":-37.8,"2026-05":25.6,"2026-06":-22.0,"2026-07":11.3,"2026-08":105.0,"2026-09":70.8},"anom":[-3.6,-8.9,-9.8,-8.8]},"desc":{"tipo":"fija","q":9.8},"comite":null,"verif":{"n":15,"meses":[10,11,12],"mae":[6.6,12.7,13.3],"cob":[67,73,73]}},"tomine":{"nom":"Tominé","sis":"Sistema Agregado Norte","hoja":"EMBALSE DEL TOMINE 03","ymax":700,"ystep":100,"cap":689.5,"cap_fuente":"Comité hidrológico CAR, 13 ago 2026: 405.96 Mm³ = 58.9 %","vmax":689.5,"v0":420.56,"obs":"405.1,404.5,403.9,403.6,403.0,402.7,403.0,403.3,403.3,403.0,402.7,402.1,401.5,401.0,400.7,400.1,399.8,399.5,398.9,398.3,397.7,397.4,397.4,397.1,396.6,396.0,395.4,395.4,395.7,395.4,395.1,394.8,394.5,394.5,394.2,393.6,393.3,392.8,392.8,392.2,391.3,390.7,390.1,389.6,389.3,388.7,388.1,387.5,387.3,386.7,386.1,385.5,384.9,384.4,383.8,383.2,382.6,382.3,381.8,381.2,380.6,380.0,379.5,378.9,378.6,378.0,377.5,376.9,376.3,375.8,375.2,374.9,374.3,374.0,373.8,373.2,372.9,372.6,372.0,371.8,371.5,371.2,370.9,370.6,370.3,369.8,369.2,368.9,368.9,368.6,368.4,367.8,367.2,366.7,366.4,366.1,366.1,365.8,365.5,365.2,364.7,364.1,363.6,363.0,363.0,363.6,364.1,365.0,365.5,365.8,365.8,365.5,365.2,365.2,365.2,365.5,365.5,366.1,366.7,367.2,367.2,366.9,367.2,367.2,367.2,367.2,367.5,367.5,367.8,367.8,367.8,367.8,367.5,367.5,367.2,366.9,366.7,366.4,366.1,367.2,367.8,367.8,368.1,368.1,368.4,368.6,369.5,372.0,373.8,375.2,375.8,376.3,376.9,376.9,377.2,377.5,378.0,378.3,378.9,380.0,381.5,381.8,381.8,381.5,381.5,381.2,381.2,381.2,381.5,381.5,381.5,381.5,381.5,381.2,381.2,381.2,380.9,380.9,380.6,380.6,381.5,382.3,383.2,384.1,384.9,386.1,387.0,387.8,388.7,388.4,388.4,389.6,389.9,391.0,391.3,391.6,392.2,393.9,394.5,395.4,396.6,397.4,398.0,398.3,399.2,400.4,401.2,401.8,402.4,402.7,402.7,403.3,403.6,403.9,404.8,405.1,405.1,404.8,405.1,405.7,406.0,406.0,406.0,406.3,406.0,405.4,405.4,405.4,405.4,406.9,408.3,408.3,408.6,408.9,409.5,410.4,411.6,412.2,412.8,413.4,414.0,414.6,415.2,416.1,417.0,417.6,418.2,418.8,419.4,420.3,420.6,420.0,419.4,418.8,418.5,419.4,420.0,420.3,420.3,420.0,420.6,420.6,421.2,421.8,422.1,422.4,422.1,421.8,421.2,420.9,420.6,420.6,420.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,","ult":[2026,9,30,420.3],"analogos":{"2009":[6.85,3.53,2.9,-1.79],"2011":[8.72,25.11,36.95,26.7],"2012":[9.4,12.61,4.88,0.37],"2013":[7.95,2.11,11.93,8.62],"2014":[12.27,7.84,9.49,5.25],"2015":[9.66,1.04,3.94,1.28],"2016":[12.48,5.66,9.47,-6.06],"2017":[11.19,5.79,7.23,4.98],"2018":[11.23,8.87,6.06,2.67],"2019":[11.95,11.21,10.82,8.12],"2020":[8.48,7.36,18.04,4.66],"2021":[10.82,10.81,13.26,2.41],"2022":[8.35,12.95,22.78,13.18],"2023":[4.15,3.36,7.56,3.35],"2024":[0.02,5.69,25.63,2.29],"2025":[10.04,6.2,5.47,5.73]},"afl":{"tit":"Afluencia implícita","uni":"m³/s","media":[0.68,0.92,2.95,5.31,7.58,9.14,9.99,6.03,3.46,3.04,5.04,2.01],"p10":[-0.84,-0.37,0.22,2.01,3.09,5.94,5.65,3.84,2.12,1.02,1.74,-0.18],"p90":[2.12,1.81,6.8,12.1,14.42,13.59,13.89,8.8,4.67,4.77,9.9,4.2],"n":[16,16,15,15,16,16,17,17,16,16,17,17],"act":[1.65,0.28,0.52,4.12,6.81,6.08,9.97,7.56,4.76,null,null,null],"dias":[31,28,31,30,31,30,31,31,30,null,null,null],"dim":[31,28,31,30,31,30,31,31,30,31,30,31]},"ideam":{"media":[32.07,31.91,33.76,36.08,39.69,39.25,39.6,38.12,35.81,37.4,37.78,33.2],"emis":{"2025-12":{"2025-12":1.4,"2026-01":0.8,"2026-02":-0.6,"2026-03":4.7,"2026-04":-0.7,"2026-05":-7.1,"2026-06":-2.1},"2026-01":{"2026-01":-1.6,"2026-02":-1.5,"2026-03":3.8,"2026-04":1.4,"2026-05":-9.3,"2026-06":-2.0,"2026-07":-2.2},"2026-02":{"2026-02":4.1,"2026-03":8.6,"2026-04":3.7,"2026-05":-3.0,"2026-06":5.6,"2026-07":-1.5,"2026-08":-5.8},"2026-03":{"2026-03":8.3,"2026-04":-0.2,"2026-05":-6.1,"2026-06":-0.7,"2026-07":-2.6,"2026-08":-8.1,"2026-09":-10.9},"2026-04":{"2026-04":-1.1,"2026-05":-9.2,"2026-06":1.6,"2026-07":-8.6,"2026-08":-9.8,"2026-09":-14.3,"2026-10":-16.5},"2026-05":{"2026-05":-9.1,"2026-06":4.3,"2026-07":2.7,"2026-08":-5.6,"2026-09":-11.3,"2026-10":-17.2,"2026-11":-16.8},"2026-06":{"2026-06":4.5,"2026-07":-0.4,"2026-08":-4.4,"2026-09":-12.1,"2026-10":-16.3,"2026-11":-14.3,"2026-12":-9.2}},"obs":{"2025-12":6.2,"2026-01":143.1,"2026-02":-69.8,"2026-03":-82.5,"2026-04":-22.4,"2026-05":-10.1,"2026-06":-33.5,"2026-07":-0.2,"2026-08":25.3,"2026-09":37.6},"anom":[-12.1,-16.3,-14.3,-9.2]},"desc":{"tipo":"comite","cuota":0.4667,"q":[4.0,3.5]},"comite":{"desc":[4.0,4.0,3.5],"afl":[5.88,3.34,3.97],"v":405.96,"pct":58.9,"esc":[["80 %",403.16],["100 %",409.05],["120 %",414.93]],"fecha_esc":"2026-10-31"},"verif":{"n":16,"meses":[10,11,12],"mae":[4.6,10.2,14.7],"cob":[69,75,69]}},"neusa":{"nom":"Neusa","sis":"Sistema Agregado Norte","hoja":"EMBALSE NEUSA 01","ymax":120,"ystep":20,"cap":102.3,"cap_fuente":"Comité hidrológico CAR, 13 ago 2026: 87.5 Mm³ = 85.5 %","vmax":114.9,"v0":87.57,"obs":"85.7,85.7,85.6,85.6,85.5,85.5,85.6,85.5,85.5,85.4,85.3,85.2,85.1,85.0,85.0,84.9,84.9,84.8,84.7,84.6,84.5,84.4,84.3,84.1,84.1,84.1,84.1,84.2,84.2,84.2,84.1,84.1,84.1,84.0,83.9,83.8,83.7,83.6,83.6,83.5,83.5,83.5,83.5,83.5,83.5,83.4,83.4,83.4,83.3,83.3,83.3,83.2,83.2,83.2,83.2,83.2,83.2,83.1,83.1,83.0,83.0,82.9,82.8,82.7,82.6,82.6,82.6,82.5,82.5,82.5,82.5,82.5,82.5,82.5,82.5,82.4,82.4,82.4,82.4,82.3,82.3,82.3,82.3,82.3,82.2,82.2,82.2,82.2,82.4,82.4,82.5,82.5,82.5,82.6,82.6,82.7,82.7,82.7,82.7,82.7,82.7,82.7,82.6,82.6,82.6,82.9,83.0,83.2,83.3,83.3,83.4,83.5,83.5,83.6,84.0,84.4,84.8,85.2,85.3,85.5,85.6,85.7,85.7,85.7,85.7,85.7,85.6,85.5,85.4,85.3,85.2,85.2,85.1,85.0,85.0,84.9,84.8,84.7,84.7,84.7,84.6,84.6,84.5,84.4,84.3,84.2,84.3,84.4,84.4,84.5,84.5,84.6,84.6,84.6,84.7,84.8,84.8,84.9,85.0,85.0,85.1,85.2,85.3,85.4,85.4,85.4,85.3,85.4,85.4,85.4,85.4,85.4,85.3,85.3,85.3,85.3,85.3,85.2,85.2,85.3,85.4,85.7,85.8,85.9,86.0,86.2,86.3,86.4,86.5,86.5,86.6,86.6,86.7,86.8,86.8,86.8,86.8,86.8,86.9,87.0,87.0,87.0,87.1,87.1,87.2,87.2,87.3,87.4,87.4,87.4,87.5,87.5,87.5,87.6,87.6,87.6,87.6,87.6,87.6,87.5,87.5,87.5,87.5,87.5,87.5,87.4,87.4,87.4,87.5,87.5,87.4,87.4,87.5,87.5,87.6,87.6,87.6,87.7,87.7,87.7,87.8,87.8,87.8,87.8,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.9,87.8,87.8,87.8,87.8,87.7,87.7,87.6,87.6,87.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,","ult":[2026,9,30,87.5],"analogos":{"2009":[2.65,4.57,3.16,0.35],"2011":[2.16,9.6,15.47,10.15],"2012":[1.69,5.5,3.33,1.85],"2013":[1.65,1.4,3.62,3.8],"2014":[2.25,2.76,6.34,3.38],"2015":[1.97,1.35,1.89,1.25],"2016":[3.55,3.38,8.1,4.38],"2017":[1.85,2.98,6.77,3.69],"2018":[6.45,6.2,3.91,1.45],"2019":[3.07,3.91,5.78,2.68],"2020":[2.45,1.1,10.88,3.05],"2021":[2.51,7.31,9.22,1.96],"2022":[3.97,14.78,4.51,8.24],"2023":[1.29,1.73,3.88,1.44],"2024":[0.86,1.73,10.47,2.32],"2025":[2.85,5.56,3.16,3.31]},"afl":{"tit":"Afluencia implícita","uni":"m³/s","media":[0.6,0.52,1.29,2.69,2.41,2.1,1.5,1.35,0.99,1.72,2.49,1.35],"p10":[0.24,-0.1,0.4,0.56,0.57,0.93,0.68,0.5,0.57,0.51,1.22,0.51],"p90":[1.25,0.93,2.18,5.63,5.31,3.24,2.3,2.29,1.45,3.16,4.1,3.09],"n":[16,16,15,15,16,16,17,17,16,16,17,17],"act":[0.82,0.72,0.73,2.21,1.41,1.35,1.78,1.14,0.86,null,null,null],"dias":[31,28,31,30,31,30,31,31,30,null,null,null],"dim":[31,28,31,30,31,30,31,31,30,31,30,31]},"ideam":{"media":[30.64,30.27,30.15,30.59,30.98,30.84,30.55,30.31,30.04,29.98,30.52,30.74],"emis":{"2025-12":{"2025-12":9.4,"2026-01":6.8,"2026-02":7.1,"2026-03":8.0,"2026-04":11.1,"2026-05":12.7,"2026-06":13.4},"2026-01":{"2026-01":7.0,"2026-02":5.0,"2026-03":7.1,"2026-04":9.2,"2026-05":9.2,"2026-06":9.8,"2026-07":7.9},"2026-02":{"2026-02":12.5,"2026-03":12.2,"2026-04":18.5,"2026-05":21.9,"2026-06":20.0,"2026-07":17.1,"2026-08":11.1},"2026-03":{"2026-03":15.1,"2026-04":21.7,"2026-05":26.2,"2026-06":23.2,"2026-07":18.9,"2026-08":12.5,"2026-09":8.0},"2026-04":{"2026-04":15.1,"2026-05":19.9,"2026-06":20.5,"2026-07":18.1,"2026-08":12.3,"2026-09":5.8,"2026-10":2.1},"2026-05":{"2026-05":17.1,"2026-06":18.6,"2026-07":18.5,"2026-08":12.4,"2026-09":5.8,"2026-10":0.9,"2026-11":-2.0},"2026-06":{"2026-06":12.8,"2026-07":13.7,"2026-08":9.5,"2026-09":4.5,"2026-10":-0.4,"2026-11":-2.7,"2026-12":-3.6}},"obs":{"2025-12":-8.8,"2026-01":36.1,"2026-02":38.2,"2026-03":-43.2,"2026-04":-17.8,"2026-05":-41.7,"2026-06":-35.8,"2026-07":18.3,"2026-08":-15.8,"2026-09":-13.5},"anom":[4.5,-0.4,-2.7,-3.6]},"desc":{"tipo":"comite","cuota":0.2667,"q":[1.5,2.0]},"comite":{"desc":[1.0,1.5,2.0],"afl":[1.53,1.29,1.41],"v":87.5,"pct":85.5,"esc":[["80 %",87.38],["100 %",89.43],["120 %",91.49]],"fecha_esc":"2026-09-30"},"verif":{"n":16,"meses":[10,11,12],"mae":[2.8,3.7,4.9],"cob":[69,62,75]}},"sisga":{"nom":"Sisga","sis":"Sistema Agregado Norte","hoja":"EMBALSE SISGA 02","ymax":100,"ystep":20,"cap":90.1,"cap_fuente":"Comité hidrológico CAR, 13 ago 2026: 85.68 Mm³ = 95.1 %","vmax":90.1,"v0":86.91,"obs":"62.1,62.1,62.0,61.9,61.9,61.8,61.8,61.8,61.8,61.5,61.4,61.3,61.2,61.1,61.0,61.0,60.9,60.8,60.6,60.6,60.4,60.3,60.2,60.1,59.9,59.8,59.7,59.6,59.4,59.3,59.2,59.1,59.0,58.9,58.8,58.7,58.5,58.4,58.4,58.4,58.2,58.1,57.9,57.7,57.6,57.4,57.2,57.0,56.9,56.7,56.6,56.4,56.2,56.0,55.9,55.7,55.6,55.4,55.2,55.0,54.9,54.7,54.6,54.3,54.1,54.0,53.8,53.7,53.5,53.3,53.2,53.0,52.9,52.7,52.5,52.3,52.2,52.0,51.8,51.6,51.5,51.3,51.2,51.0,50.8,50.6,50.5,50.4,50.3,50.1,49.9,49.8,49.6,49.4,49.2,49.1,48.9,48.8,48.6,48.5,48.3,48.2,48.0,47.9,47.9,47.9,48.0,48.0,47.9,47.9,47.8,47.8,47.8,47.8,47.9,47.9,48.6,48.8,48.9,49.1,49.2,49.3,49.4,49.4,49.4,49.5,49.6,49.7,49.6,49.6,49.6,49.6,49.6,49.6,49.9,50.1,50.1,50.1,50.4,51.0,51.2,51.5,51.7,51.9,52.0,52.5,53.5,55.2,56.3,57.2,57.8,58.2,58.6,59.1,59.6,59.9,60.3,60.8,61.2,61.5,61.8,61.9,62.0,62.1,62.1,62.2,62.3,62.5,63.0,63.2,63.5,63.6,63.7,63.8,63.8,63.8,63.9,63.9,64.0,64.6,65.3,66.9,67.5,68.3,69.5,70.2,70.8,71.2,71.6,71.9,72.6,72.9,72.9,74.0,74.2,74.6,75.5,76.1,76.5,77.1,77.5,78.2,78.5,78.7,79.9,80.4,80.7,81.3,81.6,81.9,82.2,82.5,83.0,83.3,83.5,83.7,83.8,84.2,84.7,84.9,85.2,85.4,85.5,85.6,85.7,85.8,86.0,86.1,86.5,87.6,88.2,88.4,88.5,88.9,89.6,89.9,89.9,89.8,89.7,89.5,89.5,89.5,89.7,89.5,89.4,89.4,89.2,89.0,88.7,88.3,88.3,88.4,88.7,88.9,89.0,89.2,89.5,89.7,89.9,89.5,89.1,88.5,88.2,87.7,87.2,87.2,87.1,87.0,86.9,86.8,86.9,86.9,87.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,","ult":[2026,9,30,87.0],"analogos":{"2009":[4.97,2.97,1.34,-0.52],"2011":[8.72,11.52,12.94,10.49],"2012":[9.13,6.61,2.83,1.25],"2013":[4.35,1.13,3.57,0.93],"2014":[12.29,5.3,3.47,1.97],"2015":[3.74,2.55,2.76,1.61],"2016":[9.15,4.22,6.07,2.75],"2017":[5.62,3.45,2.1,1.76],"2018":[9.25,9.09,3.47,1.57],"2019":[6.68,5.33,3.31,1.81],"2020":[3.6,2.79,10.52,2.12],"2021":[7.21,5.45,5.53,1.16],"2022":[1.21,3.08,7.54,2.77],"2023":[2.34,1.13,3.05,0.47],"2024":[1.05,2.0,11.49,1.31],"2025":[8.55,4.04,2.5,3.23]},"afl":{"tit":"Afluencia implícita","uni":"m³/s","media":[0.36,0.31,0.96,2.27,3.54,6.21,6.87,4.62,2.36,1.65,2.05,0.86],"p10":[-0.18,-0.14,-0.06,0.77,1.85,3.92,4.23,2.5,0.68,0.59,0.9,0.28],"p90":[0.85,0.76,2.4,5.67,4.95,8.83,9.44,6.85,3.55,2.93,4.21,1.4],"n":[16,16,15,15,16,16,17,17,16,16,17,17],"act":[0.32,0.17,0.08,1.26,4.24,3.89,7.43,5.35,4.26,null,null,null],"dias":[31,28,31,30,31,30,31,31,30,null,null,null],"dim":[31,28,31,30,31,30,31,31,30,31,30,31]},"ideam":{"media":[26.84,26.18,25.79,25.82,26.17,26.72,27.37,28.08,28.23,27.75,27.78,27.57],"emis":{"2025-12":{"2025-12":-1.9,"2026-01":-2.1,"2026-02":-1.4,"2026-03":-0.9,"2026-04":-0.6,"2026-05":-0.6,"2026-06":1.4},"2026-01":{"2026-01":-0.5,"2026-02":-0.9,"2026-03":-0.7,"2026-04":-0.3,"2026-05":-0.4,"2026-06":1.6,"2026-07":8.7},"2026-02":{"2026-02":2.2,"2026-03":1.6,"2026-04":2.3,"2026-05":3.5,"2026-06":10.4,"2026-07":52.6,"2026-08":33.0},"2026-03":{"2026-03":1.2,"2026-04":1.8,"2026-05":2.0,"2026-06":5.1,"2026-07":39.1,"2026-08":26.9,"2026-09":24.2},"2026-04":{"2026-04":0.2,"2026-05":0.3,"2026-06":4.2,"2026-07":11.9,"2026-08":19.0,"2026-09":20.7,"2026-10":12.8},"2026-05":{"2026-05":0.6,"2026-06":5.5,"2026-07":81.0,"2026-08":34.5,"2026-09":34.6,"2026-10":20.7,"2026-11":9.8},"2026-06":{"2026-06":5.1,"2026-07":57.4,"2026-08":30.5,"2026-09":32.8,"2026-10":19.1,"2026-11":10.6,"2026-12":8.2}},"obs":{"2025-12":40.2,"2026-01":-11.3,"2026-02":-45.6,"2026-03":-91.2,"2026-04":-44.4,"2026-05":19.7,"2026-06":-37.4,"2026-07":8.2,"2026-08":15.9,"2026-09":80.5},"anom":[32.8,19.1,10.6,8.2]},"desc":{"tipo":"comite","cuota":0.2667,"q":[1.5,2.0]},"comite":{"desc":[1.0,1.5,2.0],"afl":[4.63,2.88,2.33],"v":85.68,"pct":95.1,"esc":[["70 %",89.82]],"fecha_esc":"2026-10-31","nota":"Con 100 % y 120 % de afluencia el comité no reporta volumen: el embalse se llena."},"verif":{"n":16,"meses":[10,11,12],"mae":[2.4,3.9,4.5],"cob":[75,62,75]}}}};
+// ===== Constantes fijas =====
+// Curvas guía de operación en Mm3 (las mismas de index_SA.html). El punto x=12 repite enero.
+const GUIA = {"chuza":[{"x":0,"y":130},{"x":1,"y":100},{"x":2,"y":70},{"x":3,"y":45},{"x":4,"y":40},{"x":5,"y":55},{"x":6,"y":90},{"x":7,"y":120},{"x":8,"y":140},{"x":9,"y":150},{"x":10,"y":160},{"x":11,"y":145},{"x":12,"y":130}],"tomine":[{"x":0,"y":70},{"x":1,"y":40},{"x":2,"y":30},{"x":3,"y":30},{"x":4,"y":30},{"x":5,"y":50},{"x":6,"y":80},{"x":7,"y":100},{"x":8,"y":110},{"x":9,"y":110},{"x":10,"y":120},{"x":11,"y":90},{"x":12,"y":70}],"neusa":[{"x":0,"y":57},{"x":1,"y":49},{"x":2,"y":42},{"x":3,"y":42},{"x":4,"y":44},{"x":5,"y":51},{"x":6,"y":62},{"x":7,"y":66},{"x":8,"y":67},{"x":9,"y":68},{"x":10,"y":70},{"x":11,"y":64},{"x":12,"y":57}],"sisga":[{"x":0,"y":23},{"x":1,"y":19},{"x":2,"y":18},{"x":3,"y":18},{"x":4,"y":18},{"x":5,"y":18},{"x":6,"y":20},{"x":7,"y":25},{"x":8,"y":26},{"x":9,"y":27},{"x":10,"y":26},{"x":11,"y":24},{"x":12,"y":23}]};
+const MN = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MNC = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const ORDEN = ['chuza','tomine','neusa','sisga'];
+const COLOR_EMB = {chuza:'#1a237e', tomine:'#00695c', neusa:'#4527a0', sisga:'#bf360c'};
+const ANIO = 2026;
+const F = 0.0864;                  // 1 m3/s sostenido un día = 0.0864 Mm3
+// Meses de la proyección y día de arranque, deducidos de la fecha que trae PRON.
+const MES_INI = +PRON.meta.inicio.slice(5,7) - 1, DIA_INI = +PRON.meta.inicio.slice(8,10);
+const MESES_P = [];
+for(var mp = MES_INI; mp <= 11; mp++) MESES_P.push(mp);
+// Series: paleta categórica validada (observado, proyección, señal IDEAM, comité CAR).
+const C_OBS = '#2a78d6', C_PRO = '#eb6834', C_PRO_BANDA = 'rgba(235,104,52,0.14)',
+      C_IDE = '#1baf7a', C_COM = '#4a3aa7', C_MEDIA = '#c3c2b7';
+const C_GUIA = '#212121', INK = '#1a1a2e', INK2 = '#52514e', MUTED = '#898781', GRID = '#e1e0d9';
+
+function isLeap(y){ return y%4===0 && (y%100!==0 || y%400===0); }
+function dimM(yr,m){ var d=[31,isLeap(yr)?29:28,31,30,31,30,31,31,30,31,30,31]; return d[m]; }
+var DOY0 = [0];
+for(var i=1; i<12; i++) DOY0.push(DOY0[i-1] + dimM(ANIO,i-1));
+var NDIAS = DOY0[11] + 31;
+var I_INI = DOY0[MES_INI] + DIA_INI - 1;          // día del año del volumen de partida
+
+function xDeDia(doy){ var m=11; while(m>0 && DOY0[m]>doy) m--; return m + (doy-DOY0[m])/dimM(ANIO,m); }
+function diaDeX(x){
+  var m = Math.max(0, Math.min(11, Math.floor(x)));
+  return Math.max(0, Math.min(NDIAS-1, DOY0[m] + Math.round((x-m)*dimM(ANIO,m))));
+}
+function diaDeFecha(a,m,d){ return Math.round((new Date(a,m-1,d) - new Date(a,0,1)) / 864e5); }
+function fechaDia(doy){ return new Date(ANIO, 0, 1+doy); }
+function fmtD(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+function fCorta(doy){ var d=fechaDia(doy); return d.getDate()+' '+MNC[d.getMonth()]; }
+function etqMes(k){ return MNC[+k.slice(5,7)-1]+' '+k.slice(0,4); }
+function etqMesCorta(k){ return MNC[+k.slice(5,7)-1]+' '+k.slice(2,4); }
+function signo(v){ return (v>0?'+':'')+v.toFixed(1); }
+function extremo(series, fn, inicial){
+  var v = [inicial];
+  series.forEach(function(s){ s.forEach(function(x){ if(x !== null) v.push(x); }); });
+  return fn.apply(null, v);
+}
+
+// ===== Estado =====
+var EMB = 'chuza';        // embalse activo
+var VISTA = 'P';
+var ZOOM = false;         // false: año completo; true: ago–dic con eje ajustado
+var PAR = {};             // parámetros de operación
+var OBS = [];             // volumen observado por día del año (null = el reporte no trae dato)
+var SIM = null;           // proyección del embalse activo
+var CROSS = null;         // día del año bajo la cruz de la gráfica
+var OCULTAS = {};         // capas apagadas en la gráfica de proyección
+var chartP = null, chartF = null, chartI = null;
+var tt = document.getElementById('tt');
+
+function cfg(){ return PRON.emb[EMB]; }
+function parDefecto(){ PAR = { qChuza: PRON.emb.chuza.desc.q, tibitoc: PRON.meta.tibitoc, rio: PRON.meta.rio }; }
+
+// ===== Modelo: balance diario con paso mensual =====
+// V(día) = V(día anterior) + A/días del mes − Q·0.0864, acotado a [0, Vmáx].
+function descargas(e){
+  var d = PRON.emb[e].desc;
+  if(d.tipo === 'fija') return MESES_P.map(function(){ return PAR.qChuza; });
+  var nd = d.cuota * Math.max(0, PAR.tibitoc - PAR.rio);    // después del comité: Tibitoc menos el río
+  return MESES_P.map(function(m, i){ return i < d.q.length ? d.q[i] : nd; });
+}
+
+function trayectoria(v0, aflMes, q, vmax){
+  var v = v0, out = [v0], vert = 0;
+  for(var i=0; i<MESES_P.length; i++){
+    var m = MESES_P[i], dm = dimM(ANIO, m), paso = aflMes[i]/dm - q[i]*F;
+    var dias = dm - (m === MES_INI ? DIA_INI : 0);        // el mes de arranque entra sólo con los días que faltan
+    for(var d=0; d<dias; d++){
+      v += paso;
+      if(v > vmax){ vert += v - vmax; v = vmax; }
+      if(v < 0) v = 0;
+      out.push(v);
+    }
+  }
+  return { v:out, vert:vert };
+}
+
+function percentil(s, p){        // s ordenado; interpolación lineal
+  var h = (s.length-1)*p, i = Math.floor(h);
+  return i+1 >= s.length ? s[i] : s[i] + (h-i)*(s[i+1]-s[i]);
+}
+
+function simular(){
+  var c = cfg(), q = descargas(EMB);
+  var anios = Object.keys(c.analogos).sort();
+  var trays = anios.map(function(a){ return trayectoria(c.v0, c.analogos[a], q, c.vmax); });
+  var senal = MESES_P.map(function(m,i){ return c.afl.media[m]*dimM(ANIO,m)*F*(1 + c.ideam.anom[i]/100); });
+  var p10 = [], p50 = [], p90 = [];
+  for(var k=0; k<trays[0].v.length; k++){
+    var s = trays.map(function(t){ return t.v[k]; }).sort(function(a,b){ return a-b; });
+    p10.push(percentil(s,.1)); p50.push(percentil(s,.5)); p90.push(percentil(s,.9));
+  }
+  return { q:q, p10:p10, p50:p50, p90:p90, ide:trayectoria(c.v0, senal, q, c.vmax).v,
+           n:trays.length, anios:anios, vert:trays.filter(function(t){ return t.vert > 0.05; }).length };
+}
+
+// ===== Utilidades de DOM (los textos derivados de datos van por textContent) =====
+function nodo(tag, clase, texto){
+  var e = document.createElement(tag);
+  if(clase) e.className = clase;
+  if(texto !== undefined) e.textContent = texto;
+  return e;
+}
+function tabla(cont, cab, filas, clase){
+  var w = nodo('div','tabla-wrap'), t = nodo('table', 'tabla' + (clase ? ' '+clase : ''));
+  var th = document.createElement('thead'), tr = document.createElement('tr');
+  cab.forEach(function(x){ tr.appendChild(nodo('th', null, x)); });
+  th.appendChild(tr); t.appendChild(th);
+  var tb = document.createElement('tbody');
+  filas.forEach(function(f){
+    var r = document.createElement('tr');
+    f.forEach(function(x){ r.appendChild(nodo('td', null, x)); });
+    tb.appendChild(r);
+  });
+  t.appendChild(tb); w.appendChild(t); cont.appendChild(w);
+}
+function llave(tipo, color){
+  if(tipo === 'banda'){ var s = nodo('span','sw'); s.style.background = 'rgba(235,104,52,0.30)'; return s; }
+  if(tipo === 'barra'){ var b = nodo('span','sw'); b.style.background = color; return b; }
+  if(tipo === 'diamante'){ var d = nodo('span','mk-dia'); d.style.background = color; return d; }
+  if(tipo === 'triangulo'){ var t = nodo('span','mk-tri'); t.style.borderBottomColor = color; return t; }
+  var k = nodo('span','key');
+  k.style.borderTopColor = color; k.style.borderTopStyle = tipo;
+  if(tipo === 'dotted') k.style.borderTopWidth = '3px';
+  return k;
+}
+function itemLeyenda(cont, tipo, color, texto){
+  var it = nodo('div','afl-leg-item');
+  it.appendChild(llave(tipo, color)); it.appendChild(nodo('span', null, texto));
+  cont.appendChild(it);
+}
+
+// ===== Selector de embalse =====
+function crearSelector(){
+  var cont = document.getElementById('embTabs');
+  ORDEN.forEach(function(k){
+    var b = document.createElement('button');
+    b.className = 'emb' + (k===EMB ? ' active' : '');
+    b.id = 'emb-'+k;
+    b.textContent = PRON.emb[k].nom;
+    b.appendChild(nodo('small', null, PRON.emb[k].sis));
+    if(k===EMB){ b.style.background = COLOR_EMB[k]; b.style.borderColor = COLOR_EMB[k]; }
+    b.onclick = function(){ setEmbalse(k); };
+    cont.appendChild(b);
+  });
+}
+
+function setEmbalse(k){
+  if(k === EMB) return;
+  EMB = k;
+  ORDEN.forEach(function(e){
+    var b = document.getElementById('emb-'+e), on = (e===k);
+    b.classList.toggle('active', on);
+    b.style.background = on ? COLOR_EMB[e] : '';
+    b.style.borderColor = on ? COLOR_EMB[e] : '';
+  });
+  cargarEmbalse();
+}
+
+function cargarEmbalse(){
+  var c = cfg(), u = c.ult;
+  OBS = c.obs.split(',').map(function(s){ return s === '' ? null : +s; });
+  document.getElementById('h1').innerHTML = 'Proyecci&oacute;n de Volumen &ndash; Embalse ' +
+    (EMB==='sisga' ? 'del Sisga' : EMB==='neusa' ? 'del Neusa' : EMB==='tomine' ? 'del Tomin&eacute;' : 'de Chuza');
+  document.getElementById('sub').innerHTML =
+    c.sis + ' &nbsp;|&nbsp; Proyecci&oacute;n al 31 dic ' + ANIO + ' desde el ' + fCorta(I_INI) +
+    ' &middot; &Uacute;ltimos datos: ' + u[2] + ' ' + MNC[u[1]-1] + ' ' + u[0] + ' &middot; Millones de m&sup3;';
+  document.getElementById('fuente').textContent =
+    'Datos: reportes diarios de embalses CAR, hoja ' + c.hoja +
+    (EMB==='chuza' ? ' · Descarga: EAAB' : ' · Descargas: comité hidrológico CAR (' + PRON.meta.fecha_comite + ') y tratamiento en Tibitoc (EAAB)') +
+    ' · Señal: IDEAM, radicado 20263040120291 · Generado el ' + PRON.meta.generado;
+  [chartP, chartF, chartI].forEach(function(ch){ if(ch) ch.destroy(); });
+  chartP = chartF = chartI = null;
+  CROSS = null; tt.style.display = 'none';
+  controles();
+  if(VISTA === 'P') buildP();
+  if(VISTA === 'F') drawF();
+  if(VISTA === 'I') drawI();
+  if(VISTA === 'S') drawS();
+}
+
+// ===== Controles de operación =====
+function controles(){
+  var norte = EMB !== 'chuza';
+  document.getElementById('rngChuza').style.display = norte ? 'none' : '';
+  document.getElementById('rngTib').style.display = norte ? '' : 'none';
+  document.getElementById('rngRio').style.display = norte ? '' : 'none';
+  document.getElementById('qChuza').value = PAR.qChuza;
+  document.getElementById('qTib').value = PAR.tibitoc;
+  document.getElementById('qRio').value = PAR.rio;
+  textoControles();
+}
+
+function textoControles(){
+  document.getElementById('qChuzaV').textContent = PAR.qChuza.toFixed(1);
+  document.getElementById('qTibV').textContent = PAR.tibitoc.toFixed(1);
+  document.getElementById('qRioV').textContent = PAR.rio.toFixed(1);
+  var el = document.getElementById('escNota');
+  if(EMB === 'chuza'){ el.textContent = 'Planta + fondo, constante hasta diciembre'; return; }
+  var tot = Math.max(0, PAR.tibitoc - PAR.rio), e = PRON.emb;
+  el.textContent = 'Descarga nov–dic: Tominé ' + (e.tomine.desc.cuota*tot).toFixed(2) +
+    ' · Neusa ' + (e.neusa.desc.cuota*tot).toFixed(2) + ' · Sisga ' + (e.sisga.desc.cuota*tot).toFixed(2) + ' m³/s';
+}
+
+['qChuza','qTib','qRio'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', function(ev){
+    var v = parseFloat(ev.target.value);
+    if(id === 'qChuza') PAR.qChuza = v; else if(id === 'qTib') PAR.tibitoc = v; else PAR.rio = v;
+    textoControles();
+    if(chartP) actualizarP();
+  });
+});
+document.getElementById('btnReset').onclick = function(){ parDefecto(); controles(); if(chartP) actualizarP(); };
+document.getElementById('zAnio').onclick = function(){ setZoom(false); };
+document.getElementById('zPro').onclick = function(){ setZoom(true); };
+
+function setZoom(z){
+  ZOOM = z;
+  document.getElementById('zAnio').classList.toggle('active', !z);
+  document.getElementById('zPro').classList.toggle('active', z);
+  if(!chartP) return;
+  CROSS = null; tt.style.display = 'none';
+  aplicarZoom(); chartP.update('none');
+}
+
+// ===== VISTA PROYECCIÓN =====
+var CAPAS = [
+  { txt:'Observado 2026',          ds:[6],   tipo:'solid',  color:C_OBS },
+  { txt:'Proyección · mediana',    ds:[5],   tipo:'dashed', color:C_PRO },
+  { txt:'Rango probable P10–P90',  ds:[0,1], tipo:'banda',  color:C_PRO },
+  { txt:'Señal IDEAM',             ds:[4],   tipo:'dotted', color:C_IDE },
+  { txt:'Curva guía',              ds:[3],   tipo:'dashed', color:C_GUIA },
+  { txt:'Capacidad útil',          ds:[2],   tipo:'solid',  color:INK2 }
+];
+
+function puntosPro(arr){ return arr.map(function(v,k){ return { x:xDeDia(I_INI+k), y:v }; }); }
+function puntosObs(){
+  var out = [];
+  OBS.forEach(function(v,i){ if(v !== null) out.push({ x:xDeDia(i), y:v }); });
+  return out;
+}
+
+// Rótulos, inicio de la proyección y cruz de lectura, dibujados sobre las series.
+var capasP = {
+  id:'capasP',
+  afterDatasetsDraw:function(chart){
+    var c = cfg(), ctx = chart.ctx, ca = chart.chartArea, sx = chart.scales.x, sy = chart.scales.y;
+    ctx.save();
+    ctx.font = '600 10.5px Segoe UI, Arial';
+    var x0 = sx.getPixelForValue(xDeDia(I_INI+1));
+    if(x0 >= ca.left && x0 <= ca.right){
+      ctx.strokeStyle = MUTED; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, ca.top); ctx.lineTo(x0, ca.bottom); ctx.stroke();
+      ctx.fillStyle = INK2; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      ctx.fillText(fCorta(I_INI) + ' · inicio de la proyección', x0-5, ca.top-3);
+    }
+    if(chart.isDatasetVisible(2)){
+      var yc = sy.getPixelForValue(c.cap);
+      if(yc >= ca.top+12 && yc <= ca.bottom){
+        ctx.fillStyle = INK2; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('Capacidad útil · ' + c.cap.toFixed(1) + ' Mm³', ca.left+6, yc-3);
+      }
+    }
+    if(chart.isDatasetVisible(5)){
+      var n = SIM.p50.length-1, ye = sy.getPixelForValue(SIM.p50[n]);
+      if(ye >= ca.top && ye <= ca.bottom){
+        ctx.fillStyle = INK; ctx.font = '700 11px Segoe UI, Arial'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(SIM.p50[n].toFixed(0), sx.getPixelForValue(12)+6, ye);
+      }
+    }
+    if(CROSS !== null){
+      var xp = sx.getPixelForValue(xDeDia(CROSS));
+      ctx.strokeStyle = INK2; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(xp, ca.top); ctx.lineTo(xp, ca.bottom); ctx.stroke();
+      var pts = [], k = CROSS - I_INI;
+      if(chart.isDatasetVisible(6) && OBS[CROSS] !== null) pts.push([OBS[CROSS], C_OBS]);
+      if(k >= 0 && chart.isDatasetVisible(5)) pts.push([SIM.p50[k], C_PRO]);
+      if(k >= 0 && chart.isDatasetVisible(4)) pts.push([SIM.ide[k], C_IDE]);
+      pts.forEach(function(p){
+        var yp = sy.getPixelForValue(p[0]);
+        if(yp < ca.top || yp > ca.bottom) return;
+        ctx.beginPath(); ctx.arc(xp, yp, 4, 0, 2*Math.PI);
+        ctx.fillStyle = p[1]; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+      });
+    }
+    ctx.restore();
+  }
+};
+
+function buildP(){
+  var c = cfg();
+  if(chartP){ chartP.destroy(); chartP = null; }
+  SIM = simular();
+  var DS = [
+    { label:'P10', data:puntosPro(SIM.p10), borderWidth:0, pointRadius:0, showLine:true, fill:false, order:9 },
+    { label:'P90', data:puntosPro(SIM.p90), borderWidth:0, pointRadius:0, showLine:true,
+      fill:'-1', backgroundColor:C_PRO_BANDA, order:9 },
+    { label:'Capacidad útil', data:[{x:0,y:c.cap},{x:12,y:c.cap}], borderColor:INK2, borderWidth:1,
+      pointRadius:0, showLine:true, fill:false, order:8 },
+    { label:'Curva guía', data:GUIA[EMB] || [], borderColor:C_GUIA, borderWidth:1.5, borderDash:[8,4],
+      pointRadius:0, tension:.4, showLine:true, fill:false, order:7 },
+    { label:'Señal IDEAM', data:puntosPro(SIM.ide), borderColor:C_IDE, borderWidth:2.5, borderDash:[1,5],
+      borderCapStyle:'round', pointRadius:0, showLine:true, fill:false, order:5 },
+    { label:'Mediana', data:puntosPro(SIM.p50), borderColor:C_PRO, borderWidth:2, borderDash:[7,4],
+      pointRadius:0, showLine:true, fill:false, order:4 },
+    { label:'Observado', data:puntosObs(), borderColor:C_OBS, borderWidth:2, pointRadius:0,
+      showLine:true, fill:false, order:1 }
+  ];
+  chartP = new Chart(document.getElementById('cp').getContext('2d'), {
+    type:'scatter', data:{ datasets:DS }, plugins:[capasP],
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      events:[],                                  // la cruz se maneja con eventos propios
+      layout:{ padding:{ top:18, right:34 } },
+      plugins:{ legend:{ display:false }, tooltip:{ enabled:false } },
+      scales:{
+        x:{
+          type:'linear', min:0, max:12,
+          ticks:{ stepSize:1, color:MUTED, callback:function(v){ var i=Math.round(v); return (Math.abs(v-i)<1e-6 && i<12) ? MN[i] : ''; } },
+          grid:{ color:GRID }
+        },
+        y:{
+          min:0, max:c.ymax, ticks:{ stepSize:c.ystep, color:MUTED },
+          title:{ display:true, text:'Volumen (Mm³)', color:INK2, font:{ size:11 } },
+          grid:{ color:GRID }
+        }
+      }
+    }
+  });
+  aplicarVisibilidad();
+  aplicarZoom();
+  chartP.update('none');
+  chipsP();
+  textosP();
+}
+
+function actualizarP(){
+  SIM = simular();
+  var d = chartP.data.datasets;
+  d[0].data = puntosPro(SIM.p10);
+  d[1].data = puntosPro(SIM.p90);
+  d[4].data = puntosPro(SIM.ide);
+  d[5].data = puntosPro(SIM.p50);
+  aplicarZoom();
+  chartP.update('none');
+  textosP();
+  if(CROSS !== null) ocultarCruz();
+}
+
+function pasoBonito(r){
+  var p = [1,2,5,10,20,25,50,100,200];
+  for(var i=0; i<p.length; i++) if(p[i] >= r) return p[i];
+  return 500;
+}
+
+function aplicarZoom(){
+  var c = cfg(), x = chartP.options.scales.x, y = chartP.options.scales.y;
+  if(!ZOOM){ x.min = 0; y.min = 0; y.max = c.ymax; y.ticks.stepSize = c.ystep; return; }
+  x.min = 7;
+  var vals = [];
+  for(var i=DOY0[7]; i<NDIAS; i++) if(OBS[i] !== null) vals.push(OBS[i]);
+  vals = vals.concat(SIM.p10, SIM.p90, SIM.ide);
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if(c.cap >= lo && c.cap <= hi + (hi-lo)*0.6) hi = Math.max(hi, c.cap);
+  var pad = Math.max((hi-lo)*0.08, 1), paso = pasoBonito((hi-lo+2*pad)/6);
+  y.min = Math.max(0, Math.floor((lo-pad)/paso)*paso);
+  y.max = Math.ceil((hi+pad)/paso)*paso;
+  y.ticks.stepSize = paso;
+}
+
+function aplicarVisibilidad(){
+  CAPAS.forEach(function(k){ k.ds.forEach(function(i){ chartP.setDatasetVisibility(i, !OCULTAS[k.txt]); }); });
+}
+
+function chipsP(){
+  var cont = document.getElementById('chipsP');
+  cont.innerHTML = '';
+  CAPAS.forEach(function(k){
+    var ch = nodo('button', 'chip2' + (OCULTAS[k.txt] ? ' off' : ''));
+    ch.type = 'button';
+    ch.setAttribute('aria-pressed', OCULTAS[k.txt] ? 'false' : 'true');
+    ch.appendChild(llave(k.tipo, k.color));
+    ch.appendChild(document.createTextNode(k.txt));
+    ch.onclick = function(){ OCULTAS[k.txt] = !OCULTAS[k.txt]; aplicarVisibilidad(); chartP.update('none'); chipsP(); };
+    cont.appendChild(ch);
+  });
+}
+
+function tile(cont, lbl, num, sub){
+  var t = nodo('div','stat');
+  t.appendChild(nodo('div','lbl',lbl)); t.appendChild(nodo('div','num',num)); t.appendChild(nodo('div','sub',sub));
+  cont.appendChild(t);
+}
+
+function textosP(){
+  var c = cfg(), n = SIM.p50.length-1, cap = c.cap;
+  var pc = function(v){ return (100*v/cap).toFixed(0) + ' %'; };
+  var st = document.getElementById('stats');
+  st.innerHTML = '';
+  tile(st, 'Volumen al 31 dic · mediana', SIM.p50[n].toFixed(0) + ' Mm³',
+       pc(SIM.p50[n]) + ' de la capacidad útil (' + cap.toFixed(1) + ' Mm³)');
+  tile(st, 'Rango probable al 31 dic · P10–P90', SIM.p10[n].toFixed(0) + ' – ' + SIM.p90[n].toFixed(0) + ' Mm³',
+       pc(SIM.p10[n]) + ' – ' + pc(SIM.p90[n]));
+  tile(st, 'Señal IDEAM al 31 dic', SIM.ide[n].toFixed(0) + ' Mm³',
+       pc(SIM.ide[n]) + ' · emisión ' + etqMes(PRON.meta.emision));
+  var u = c.ult, k = diaDeFecha(u[0],u[1],u[2]) - I_INI;
+  if(k >= 1 && k <= n){
+    var pos = u[3] > SIM.p90[k] ? 'por encima del rango' : u[3] < SIM.p10[k] ? 'por debajo del rango' : 'dentro del rango';
+    tile(st, 'Último dato observado · ' + u[2] + ' ' + MNC[u[1]-1], u[3].toFixed(1) + ' Mm³',
+         pos + ' proyectado (' + SIM.p10[k].toFixed(0) + ' – ' + SIM.p90[k].toFixed(0) + ')');
+  } else {
+    tile(st, 'Volumen de partida · ' + fCorta(I_INI), c.v0.toFixed(1) + ' Mm³', pc(c.v0) + ' de la capacidad útil');
+  }
+
+  var txt = 'Ensamble de <b>' + SIM.n + ' años análogos</b> (' + PRON.meta.analogos[0] + '–' + PRON.meta.analogos[1] +
+    ', meses con al menos ' + PRON.meta.min_dias + ' días de dato)';
+  if(SIM.vert) txt += ' &middot; vierte en <b>' + SIM.vert + ' de ' + SIM.n + '</b>';
+  txt += EMB === 'chuza'
+    ? ' &middot; Descarga <b>' + PAR.qChuza.toFixed(1) + ' m³/s</b> de sep a dic'
+    : ' &middot; Descargas del comité CAR en sep–oct; en nov–dic, Tibitoc <b>' + PAR.tibitoc.toFixed(1) +
+      '</b> menos río <b>' + PAR.rio.toFixed(1) + ' m³/s</b>';
+  txt += ' &middot; Lo observado desde el ' + fCorta(I_INI) + ' no entra al cálculo: sirve para verificar.';
+  document.getElementById('infoP').innerHTML = txt;
+
+  var cont = document.getElementById('tablaP'), filas = [], kk = 0;
+  cont.innerHTML = '';
+  MESES_P.forEach(function(m,i){
+    kk += dimM(ANIO,m) - (m === MES_INI ? DIA_INI : 0);
+    var o = OBS[I_INI+kk];
+    filas.push([dimM(ANIO,m) + ' ' + MNC[m], SIM.q[i].toFixed(2), SIM.p10[kk].toFixed(1), SIM.p50[kk].toFixed(1),
+                SIM.p90[kk].toFixed(1), pc(SIM.p50[kk]), SIM.ide[kk].toFixed(1), o === null ? '—' : o.toFixed(1)]);
+  });
+  tabla(cont, ['Fin de mes','Descarga (m³/s)','P10 (Mm³)','Mediana (Mm³)','P90 (Mm³)','Mediana (% útil)','Señal IDEAM (Mm³)','Observado (Mm³)'], filas);
+}
+
+// ----- Cruz de lectura: ratón, tacto y teclado -----
+function guiaEn(x){
+  var g = GUIA[EMB];
+  if(!g) return null;
+  for(var i=0; i<g.length-1; i++){
+    if(x >= g[i].x && x <= g[i+1].x) return g[i].y + (x-g[i].x)*(g[i+1].y-g[i].y)/(g[i+1].x-g[i].x);
+  }
+  return null;
+}
+
+function filaTT(tipo, color, valor, etiqueta){
+  var r = nodo('div','tt-row'), k;
+  if(tipo === 'banda'){ k = nodo('span','tt-sw'); k.style.background = 'rgba(235,104,52,0.55)'; }
+  else { k = nodo('span','tt-key'); k.style.borderTopColor = color; k.style.borderTopStyle = tipo; }
+  r.appendChild(k); r.appendChild(nodo('b', null, valor)); r.appendChild(nodo('span','tt-lbl',etiqueta));
+  return r;
+}
+
+function mostrarTT(cx, cy){
+  var c = cfg(), doy = CROSS, k = doy - I_INI;
+  var vol = function(v){ return v.toFixed(1) + ' Mm³ · ' + (100*v/c.cap).toFixed(0) + ' %'; };
+  tt.innerHTML = '';
+  tt.appendChild(nodo('div','tt-t', fmtD(fechaDia(doy))));
+  if(OBS[doy] !== null) tt.appendChild(filaTT('solid', C_OBS, vol(OBS[doy]), 'Observado'));
+  if(k >= 0){
+    tt.appendChild(filaTT('dashed', C_PRO, vol(SIM.p50[k]), 'Mediana'));
+    tt.appendChild(filaTT('banda', C_PRO, SIM.p10[k].toFixed(1) + ' – ' + SIM.p90[k].toFixed(1) + ' Mm³', 'P10–P90'));
+    tt.appendChild(filaTT('dotted', C_IDE, vol(SIM.ide[k]), 'Señal IDEAM'));
+  }
+  var g = guiaEn(xDeDia(doy));
+  if(g !== null) tt.appendChild(filaTT('dashed', '#bdbdbd', '≈ ' + g.toFixed(0) + ' Mm³', 'Curva guía'));
+  tt.style.display = 'block';
+  var w = tt.offsetWidth, h = tt.offsetHeight, left = cx + 16, top = cy - h - 12;
+  if(left + w > window.innerWidth - 8) left = cx - w - 16;
+  if(top < 8) top = cy + 16;
+  tt.style.left = left + 'px';
+  tt.style.top = top + 'px';
+}
+
+function ocultarCruz(){
+  CROSS = null; tt.style.display = 'none';
+  if(chartP) chartP.draw();
+}
+
+function moverCruz(clientX, clientY){
+  if(!chartP) return;
+  var r = chartP.canvas.getBoundingClientRect(), px = clientX - r.left, ca = chartP.chartArea;
+  if(px < ca.left || px > ca.right){ ocultarCruz(); return; }
+  CROSS = diaDeX(chartP.scales.x.getValueForPixel(px));
+  chartP.draw();
+  mostrarTT(clientX, clientY);
+}
+
+(function(){
+  var cv = document.getElementById('cp');
+  cv.addEventListener('mousemove', function(ev){ moverCruz(ev.clientX, ev.clientY); });
+  cv.addEventListener('mouseleave', ocultarCruz);
+  cv.addEventListener('touchstart', function(ev){ var t = ev.touches[0]; moverCruz(t.clientX, t.clientY); }, { passive:true });
+  cv.addEventListener('touchmove', function(ev){ var t = ev.touches[0]; moverCruz(t.clientX, t.clientY); }, { passive:true });
+  cv.addEventListener('blur', ocultarCruz);
+  cv.addEventListener('keydown', function(ev){
+    if(!chartP) return;
+    if(ev.key === 'Escape'){ ocultarCruz(); return; }
+    if(ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+    ev.preventDefault();
+    var u = cfg().ult, paso = ev.shiftKey ? 7 : 1;
+    if(CROSS === null) CROSS = diaDeFecha(u[0],u[1],u[2]);
+    CROSS += (ev.key === 'ArrowRight' ? paso : -paso);
+    CROSS = Math.max(ZOOM ? DOY0[7] : 0, Math.min(NDIAS-1, CROSS));
+    chartP.draw();
+    var r = cv.getBoundingClientRect();
+    mostrarTT(r.left + chartP.scales.x.getPixelForValue(xDeDia(CROSS)), r.top + chartP.chartArea.top + 40);
+  });
+})();
+
+// ===== VISTA AFLUENCIAS =====
+var bigotes = {
+  id:'bigotes',
+  afterDatasetsDraw:function(chart){
+    var a = cfg().afl, sy = chart.scales.y, ctx = chart.ctx;
+    ctx.save();
+    if(chart.isDatasetVisible(0)){
+      ctx.strokeStyle = INK2; ctx.lineWidth = 1.5;
+      chart.getDatasetMeta(0).data.forEach(function(bar, i){
+        if(a.p10[i] === null) return;
+        var y1 = sy.getPixelForValue(a.p10[i]), y2 = sy.getPixelForValue(a.p90[i]);
+        ctx.beginPath();
+        ctx.moveTo(bar.x, y1); ctx.lineTo(bar.x, y2);
+        ctx.moveTo(bar.x-4, y1); ctx.lineTo(bar.x+4, y1);
+        ctx.moveTo(bar.x-4, y2); ctx.lineTo(bar.x+4, y2);
+        ctx.stroke();
+      });
+    }
+    var m1 = chart.getDatasetMeta(1);
+    ctx.fillStyle = C_OBS; ctx.font = 'bold 11px Segoe UI, Arial'; ctx.textAlign = 'center';
+    a.act.forEach(function(v, i){
+      if(v === null || a.dias[i] >= a.dim[i] || !m1.data[i]) return;
+      ctx.fillText('⦿', m1.data[i].x, Math.min(m1.data[i].y, m1.data[i].base) - 6);
+    });
+    ctx.restore();
+  }
+};
+
+function drawF(){
+  var c = cfg(), a = c.afl, rango = PRON.meta.analogos[0] + '–' + PRON.meta.analogos[1];
+  if(chartF){ chartF.destroy(); chartF = null; }
+  var senal = MN.map(function(_, i){
+    var j = MESES_P.indexOf(i);
+    return j < 0 || a.media[i] === null ? null : Math.round(a.media[i]*(1 + c.ideam.anom[j]/100)*100)/100;
+  });
+  var comite = MN.map(function(_, i){ return (c.comite && i >= 7 && i <= 9) ? c.comite.afl[i-7] : null; });
+  var DS = [
+    { label:'Media ' + rango, data:a.media, backgroundColor:C_MEDIA, borderRadius:4, borderSkipped:'start', maxBarThickness:24, order:3 },
+    { label:String(ANIO), data:a.act, backgroundColor:C_OBS, borderRadius:4, borderSkipped:'start', maxBarThickness:24, order:2 },
+    { type:'line', label:'Señal IDEAM', data:senal, showLine:false, pointStyle:'rectRot', pointRadius:7, pointHoverRadius:8,
+      pointBackgroundColor:C_IDE, pointBorderColor:'#fff', pointBorderWidth:2, backgroundColor:C_IDE, borderColor:C_IDE, order:1 }
+  ];
+  if(c.comite){
+    DS.push({ type:'line', label:'Comité CAR · afluencia 100 %', data:comite, showLine:false, pointStyle:'triangle',
+      pointRadius:7, pointHoverRadius:8, pointBackgroundColor:C_COM, pointBorderColor:'#fff', pointBorderWidth:2,
+      backgroundColor:C_COM, borderColor:C_COM, order:0 });
+  }
+  chartF = new Chart(document.getElementById('cf').getContext('2d'), {
+    type:'bar', data:{ labels:MN, datasets:DS }, plugins:[bigotes],
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{ duration:250 },
+      datasets:{ bar:{ categoryPercentage:.62, barPercentage:.86 } },
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          filter:function(it){ return it.parsed.y !== null; },
+          callbacks:{
+            label:function(it){
+              var i = it.dataIndex, v = it.parsed.y.toFixed(2) + ' m³/s';
+              if(it.datasetIndex === 0 && a.p10[i] !== null) return v + '  media (P10 ' + a.p10[i].toFixed(2) + ' – P90 ' + a.p90[i].toFixed(2) + ', ' + a.n[i] + ' años)';
+              if(it.datasetIndex === 1) return v + '  ' + ANIO + (a.dias[i] < a.dim[i] ? ' ★ prom. días 1–' + a.dias[i] : '');
+              return v + '  ' + it.dataset.label;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:MUTED } },
+        y:{ suggestedMin:extremo([a.p10], Math.min, 0),                       // los bigotes quedan dentro del eje
+            suggestedMax:extremo([a.p90, a.act, a.media, senal, comite], Math.max, 0) * 1.04,
+            ticks:{ color:MUTED }, grid:{ color:GRID },
+            title:{ display:true, text:a.tit + ' (m³/s)', color:INK2, font:{ size:11 } } }
+      }
+    }
+  });
+
+  var leg = document.getElementById('legF');
+  leg.innerHTML = '';
+  itemLeyenda(leg, 'barra', C_MEDIA, 'Media ' + rango + ' · bigote: rango P10–P90');
+  itemLeyenda(leg, 'barra', C_OBS, String(ANIO) + ' (⦿ mes parcial)');
+  itemLeyenda(leg, 'diamante', C_IDE, 'Señal IDEAM: media × (1 + anomalía, emisión ' + etqMes(PRON.meta.emision) + ')');
+  if(c.comite) itemLeyenda(leg, 'triangulo', C_COM, 'Comité CAR (' + PRON.meta.fecha_comite + '), afluencia 100 %');
+
+  var parc = [];
+  a.act.forEach(function(v, i){ if(v !== null && a.dias[i] < a.dim[i]) parc.push(MN[i] + ': prom. días 1–' + a.dias[i]); });
+  document.getElementById('notaF').textContent =
+    a.tit + ' media mensual en m³/s · ' +
+    (EMB === 'chuza'
+      ? 'Columna AFLUENCIA del reporte CAR (residuo del balance: incluye lluvia y evaporación sobre el embalse)'
+      : 'Variación de volumen + descarga, del reporte CAR' + (EMB === 'tomine' ? '; incluye el bombeo desde el río Bogotá' : '')) +
+    ' · Media con meses de al menos ' + PRON.meta.min_dias + ' días de dato' + (parc.length ? ' · ' + parc.join(' · ') : '');
+
+  var cont = document.getElementById('tablaF'), filas = [];
+  cont.innerHTML = '';
+  MESES_P.forEach(function(m, j){
+    filas.push([MN[m], a.media[m].toFixed(2), a.p10[m].toFixed(2), a.p90[m].toFixed(2), signo(c.ideam.anom[j]) + ' %',
+                senal[m].toFixed(2), comite[m] === null ? '—' : comite[m].toFixed(2),
+                a.act[m] === null ? '—' : a.act[m].toFixed(2) + (a.dias[m] < a.dim[m] ? ' (días 1–' + a.dias[m] + ')' : '')]);
+  });
+  tabla(cont, ['Mes','Media ' + rango,'P10','P90','Anomalía IDEAM','Señal IDEAM','Comité CAR',String(ANIO)], filas);
+}
+
+// ===== VISTA SEÑAL IDEAM =====
+function drawI(){
+  var c = cfg(), em = c.ideam.emis, obs = c.ideam.obs, ult = PRON.meta.emision;
+  if(chartI){ chartI.destroy(); chartI = null; }
+  var emisiones = Object.keys(em).sort(), meses = {};
+  emisiones.forEach(function(k){ Object.keys(em[k]).forEach(function(m){ meses[m] = 1; }); });
+  var labels = Object.keys(meses).sort();
+  var DS = [];
+  emisiones.forEach(function(k, i){
+    var esUlt = (k === ult);
+    var gris = 'rgba(82,81,78,' + (0.22 + 0.5*i/Math.max(1, emisiones.length-2)).toFixed(2) + ')';
+    DS.push({
+      label:'Emisión ' + etqMes(k), data:labels.map(function(m){ return em[k][m] !== undefined ? em[k][m] : null; }),
+      borderColor: esUlt ? C_IDE : gris, backgroundColor: esUlt ? C_IDE : gris,
+      borderWidth: esUlt ? 2.5 : 1.5, pointRadius: esUlt ? 4 : 0, pointHoverRadius: 5,
+      pointBorderColor:'#fff', pointBorderWidth:2, tension:0, spanGaps:false, order: esUlt ? 1 : 2
+    });
+  });
+  DS.push({
+    label:'Observado (afluencia CAR)', data:labels.map(function(m){ return obs[m] !== undefined ? obs[m] : null; }),
+    borderColor:C_OBS, backgroundColor:C_OBS, borderWidth:2, pointRadius:4, pointHoverRadius:5,
+    pointBorderColor:'#fff', pointBorderWidth:2, tension:0, spanGaps:false, order:0
+  });
+  chartI = new Chart(document.getElementById('ci').getContext('2d'), {
+    type:'line', data:{ labels:labels.map(etqMesCorta), datasets:DS },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{ duration:250 },
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          filter:function(it){ return it.parsed.y !== null; },
+          callbacks:{ label:function(it){ return signo(it.parsed.y) + ' %  ' + it.dataset.label; } }
+        }
+      },
+      scales:{
+        x:{ grid:{ color:GRID }, ticks:{ color:MUTED } },
+        y:{
+          ticks:{ color:MUTED, callback:function(v){ return (v > 0 ? '+' : '') + v + ' %'; } },
+          grid:{ color:function(ctx){ return ctx.tick && ctx.tick.value === 0 ? '#9e9d97' : GRID; } },
+          title:{ display:true, text:'Anomalía respecto a la media (%)', color:INK2, font:{ size:11 } }
+        }
+      }
+    }
+  });
+
+  var leg = document.getElementById('legI');
+  leg.innerHTML = '';
+  itemLeyenda(leg, 'solid', 'rgba(82,81,78,0.6)', 'Emisiones ' + etqMes(emisiones[0]) + ' a ' + etqMes(emisiones[emisiones.length-2]) + ' (más oscura, más reciente)');
+  itemLeyenda(leg, 'solid', C_IDE, 'Emisión ' + etqMes(ult) + ' (usada en la proyección)');
+  itemLeyenda(leg, 'solid', C_OBS, 'Observado: afluencia CAR frente a su media ' + PRON.meta.analogos[0] + '–' + PRON.meta.analogos[1]);
+  document.getElementById('notaI').textContent =
+    'IDEAM: anomalía de escorrentía del modelo DWB (lluvia CHIRPS, malla de 5.5 km) frente a su media 1991–2020; ' +
+    'el IDEAM la entrega como señal de déficit o excedencia, no como magnitud (radicado 20263040120291, 14 jul 2026). ' +
+    'Observado: afluencia del reporte CAR frente a la media ' + PRON.meta.analogos[0] + '–' + PRON.meta.analogos[1] +
+    ', sólo meses con al menos ' + PRON.meta.min_dias + ' días de dato. Las dos medidas no son equivalentes en magnitud.';
+}
+
+// ===== VISTA SUPUESTOS Y VERIFICACIÓN =====
+function drawS(){
+  var c = cfg(), cont = document.getElementById('sup'), rango = PRON.meta.analogos[0] + '–' + PRON.meta.analogos[1];
+  SIM = simular();
+  cont.innerHTML = '';
+  var h = function(t){ cont.appendChild(nodo('h3', null, t)); };
+  var p = function(t){ cont.appendChild(nodo('p', null, t)); };
+
+  h('Cómo se calcula');
+  p('Balance diario con paso mensual que arranca el ' + fCorta(I_INI) + ' ' + ANIO + ', desde el volumen CAR de ese día: V(día) = V(día anterior) + A / días del mes − Q × 0.0864, ' +
+    'acotado entre 0 y el límite de vertimiento. A es la afluencia del mes (Mm³) y Q la descarga (m³/s).');
+  var nd = PRON.meta.descartes[EMB];
+  p(EMB === 'chuza'
+    ? 'Afluencia: columna AFLUENCIA del reporte CAR. Es el residuo del balance (variación de volumen + descarga a planta + descarga de fondo), así que ya incluye la lluvia y la evaporación sobre el embalse. ' +
+      'Se descartan, sin sustituirlos, los días en que no cuadra con la variación de volumen (descarga implícita fuera de −3 a 25 m³/s): ' + nd + ' días en la serie. ' +
+      'El reporte no trae vertimiento, así que en los meses con el embalse lleno la afluencia registrada puede quedar por debajo de la real.'
+    : 'Afluencia implícita: variación de volumen + descarga, calculada del reporte CAR. Incluye la lluvia y la evaporación sobre el embalse' +
+      (EMB === 'tomine' ? ' y el bombeo desde el río Bogotá' : '') + '. ' +
+      'Se descartan, sin sustituirlas, las descargas diarias mayores que tres veces el percentil 99 del embalse: ' + nd + ' días en la serie.');
+  p('Cada año análogo aporta una trayectoria con sus afluencias de los meses que faltan del año; el mes de arranque entra sólo con los días restantes. La banda es el rango P10–P90 de esas trayectorias y la línea discontinua, su mediana. ' +
+    'La señal IDEAM aplica la anomalía de escorrentía de la emisión de ' + etqMes(PRON.meta.emision) + ' a la afluencia media ' + rango + '. ' +
+    'Lo observado desde el ' + fCorta(I_INI) + ' no entra al cálculo: sirve para verificar.');
+
+  h('Parámetros · ' + c.nom);
+  tabla(cont, ['Parámetro','Valor','Fuente'], [
+    ['Volumen inicial, ' + fCorta(I_INI) + ' ' + ANIO, c.v0.toFixed(1) + ' Mm³ (' + (100*c.v0/c.cap).toFixed(1) + ' % útil)', 'Reporte diario CAR, hoja ' + c.hoja],
+    ['Capacidad útil', c.cap.toFixed(1) + ' Mm³', c.cap_fuente],
+    ['Límite de vertimiento', c.vmax.toFixed(1) + ' Mm³', 'Mayor valor entre la capacidad útil y el máximo observado en la serie CAR'],
+    ['Años análogos', SIM.n + ': ' + SIM.anios.join(', '), 'Años ' + rango + ' con septiembre a diciembre completos']
+  ], 'txt');
+  var origen = EMB === 'chuza' ? MESES_P.map(function(){ return 'EAAB'; })
+                               : MESES_P.map(function(m, i){ return i < c.desc.q.length ? 'Comité CAR' : 'Tibitoc − río'; });
+  tabla(cont, ['Mes'].concat(MESES_P.map(function(m){ return MN[m]; })), [
+    ['Descarga (m³/s)'].concat(SIM.q.map(function(v){ return v.toFixed(2); })),
+    ['Origen'].concat(origen),
+    ['Afluencia media ' + rango + ' (m³/s)'].concat(MESES_P.map(function(m){ return c.afl.media[m].toFixed(2); })),
+    ['Anomalía IDEAM, emisión ' + etqMes(PRON.meta.emision)].concat(c.ideam.anom.map(function(v){ return signo(v) + ' %'; }))
+  ]);
+  if(EMB !== 'chuza'){
+    var e = PRON.emb;
+    p('En noviembre y diciembre la descarga conjunta de Tominé, Neusa y Sisga es el tratamiento proyectado en Tibitoc (' + PAR.tibitoc.toFixed(1) +
+      ' m³/s) menos el aporte del río (' + PAR.rio.toFixed(1) + ' m³/s, bajo por El Niño), repartida en la proporción de octubre del comité: Tominé ' +
+      (100*e.tomine.desc.cuota).toFixed(0) + ' %, Neusa ' + (100*e.neusa.desc.cuota).toFixed(0) + ' %, Sisga ' + (100*e.sisga.desc.cuota).toFixed(0) + ' %.');
+  }
+
+  h('Verificación histórica');
+  var v = c.verif;
+  p('Para cada año ' + rango + ' se proyectó el resto del año desde su ' + fCorta(I_INI) + ' con las afluencias de los demás años y la descarga que realmente se ejecutó (' +
+    v.n + ' años). Esto mide la parte hidrológica: la descarga es un supuesto de operación y no se pronostica. Una banda P10–P90 bien calibrada contiene lo observado cerca del 80 % de las veces.');
+  tabla(cont, ['Fin de mes'].concat(v.meses.map(function(m){ return MN[m-1]; })), [
+    ['Error típico de la mediana (Mm³)'].concat(v.mae.map(function(x){ return x.toFixed(1); })),
+    ['Error típico (% de la capacidad útil)'].concat(v.mae.map(function(x){ return (100*x/c.cap).toFixed(1) + ' %'; })),
+    ['Observado dentro de P10–P90'].concat(v.cob.map(function(x){ return x + ' %'; }))
+  ]);
+  if(v.meses.length < MESES_P.length) p('El mes de arranque no aparece en la tabla: con tan pocos días de horizonte la banda es demasiado angosta para que su cobertura signifique algo.');
+  if(EMB === 'tomine') p('Confiabilidad baja en Tominé: sus descargas se hacen a solicitud de GEB/Enlaza y recibe bombeo desde el río Bogotá, así que la banda contiene lo observado con menos frecuencia de la esperada.');
+
+  if(c.comite){
+    var cm = c.comite, f = cm.fecha_esc, kd = diaDeFecha(+f.slice(0,4), +f.slice(5,7), +f.slice(8,10)) - I_INI;
+    h('Comparación con el comité hidrológico CAR (' + PRON.meta.fecha_comite + ')');
+    p('El comité partió de ' + cm.v.toFixed(2) + ' Mm³ (' + cm.pct.toFixed(1) + ' % útil) con las descargas de su tabla y afluencias medias de ' +
+      cm.afl.map(function(x, i){ return MNC[7+i] + ' ' + x.toFixed(2); }).join(', ') + ' m³/s. Esta proyección arranca el ' + fCorta(I_INI) + ' desde el volumen CAR de ese día, toma del comité las descargas de septiembre y octubre y usa el ensamble de años análogos.');
+    var filas = cm.esc.map(function(s){ return ['Comité · afluencia ' + s[0], s[1].toFixed(2), (100*s[1]/c.cap).toFixed(1) + ' %']; });
+    [['P10', SIM.p10], ['mediana', SIM.p50], ['P90', SIM.p90]].forEach(function(s){
+      filas.push(['Este modelo · ' + s[0], s[1][kd].toFixed(2), (100*s[1][kd]/c.cap).toFixed(1) + ' %']);
+    });
+    tabla(cont, ['Volumen al ' + fCorta(I_INI + kd) + ' ' + ANIO, 'Mm³', '% útil'], filas);
+    if(cm.nota) p(cm.nota);
+  }
+
+  h('Consideraciones');
+  var ul = nodo('ul');
+  [
+    'La proyección es un escenario condicionado a las descargas indicadas: con otra operación el resultado cambia (controles de la vista Proyección).',
+    'La señal IDEAM es escorrentía del modelo DWB y el IDEAM la entrega como señal de déficit o excedencia, no como magnitud. La vista Señal IDEAM compara sus emisiones con lo observado en ' + ANIO + '.',
+    'Sólo información oficial: reportes diarios CAR, comité hidrológico CAR, EAAB e IDEAM. Los meses con menos de ' + PRON.meta.min_dias + ' días de dato quedan fuera del ensamble; nada se interpola ni se rellena.'
+  ].forEach(function(t){ ul.appendChild(nodo('li', null, t)); });
+  cont.appendChild(ul);
+}
+
+// ===== Navegación =====
+function switchView(mode){
+  VISTA = mode;
+  ['P','F','I','S'].forEach(function(k){
+    document.getElementById('view'+k).style.display = k === mode ? '' : 'none';
+    document.getElementById('tab'+k).classList.toggle('active', k === mode);
+  });
+  CROSS = null; tt.style.display = 'none';
+  if(mode === 'P' && !chartP) buildP();
+  if(mode === 'F' && !chartF) drawF();
+  if(mode === 'I' && !chartI) drawI();
+  if(mode === 'S') drawS();
+}
+
+parDefecto();
+crearSelector();
+cargarEmbalse();
+</script>
+</body>
+</html>
